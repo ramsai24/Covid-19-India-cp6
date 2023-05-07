@@ -97,7 +97,7 @@ const convertSnakeToCamel1 = (dbObject) => {
     cases: dbObject.cases,
     cured: dbObject.cured,
     active: dbObject.active,
-    death: dbObject.death,
+    deaths: dbObject.deaths, //correction for passing testcase is deaths spelling wirtten worng for key and value as death is written
   };
 };
 
@@ -108,7 +108,7 @@ app.get("/districts/:districtId/", async (request, response) => {
     SELECT * 
     FROM district 
     WHERE 
-        district_id = ${districtId};`;
+        district_id = ${districtId}`;
 
   const districtDetails = await db.get(sqlQuery);
   response.send(convertSnakeToCamel1(districtDetails));
@@ -150,10 +150,10 @@ app.put("/districts/:districtId/", async (request, response) => {
 
 const convertSnakeToCamel2 = (dbObject) => {
   return {
-    totalCases: dbObject.cases,
-    totalCured: dbObject.cured,
-    totalActive: dbObject.active,
-    totalDeath: dbObject.deaths,
+    totalCases: dbObject["SUM(cases)"],
+    totalCured: dbObject["SUM(cured)"],
+    totalActive: dbObject["SUM(active)"],
+    totalDeaths: dbObject["SUM(deaths)"],
   };
 };
 
@@ -161,13 +161,24 @@ app.get("/states/:stateId/stats/", async (request, response) => {
   let { stateId } = request.params;
 
   const sqlQuery = `
-    SELECT  cases, cured, active, deaths
+    SELECT  SUM(cases), SUM(cured),SUM(active), SUM(deaths)
     FROM district 
     WHERE 
-        state_id = ${stateId};`;
-  //SUM(cases), SUM(cured),SUM(active), SUM(deaths)
-  const districtDetails = await db.get(sqlQuery);
-  response.send(convertSnakeToCamel2(districtDetails));
+        state_id = ${stateId}`;
+  //SUM(cases), SUM(cured),SUM(active), SUM(deaths)  ,cases, cured, active, deaths
+  const districtDetails = await db.all(sqlQuery);
+  //                     correction made for testcase passing the  is below code
+  //response.send(districtDetails);
+  const listOfObjects = districtDetails.map((eachObject) =>
+    convertSnakeToCamel2(eachObject)
+  );
+
+  response.send(listOfObjects[0]);
+  console.log(
+    districtDetails.map((eachObject) => convertSnakeToCamel2(eachObject))
+  );
+  //response.send(convertSnakeToCamel2(districtDetails)); since district details is in a list so values are undefined during coversion
+  //INNER JOIN state ON district.state_id = state.state_id
 });
 
 //API 8

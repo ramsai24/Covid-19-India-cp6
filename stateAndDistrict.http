@@ -17,7 +17,7 @@ Content-Type:application/json
 }
 
 ###
-GET http://localhost:3000/districts/322/
+GET http://localhost:3000/districts/321/
 
 ###
 delete http://localhost:3000/districts/770/
@@ -36,7 +36,7 @@ Content-Type:application/json
 }
 
 ### 
-get http://localhost:3000/states/20/stats/
+get http://localhost:3000/states/4/stats/
 
 ### 
-get http://localhost:3000/districts/20/details/
+get http://localhost:3000/districts/220/details/
